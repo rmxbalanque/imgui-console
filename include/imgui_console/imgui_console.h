@@ -1,4 +1,4 @@
-// Copyright (c) 2020, Roland Munguia
+// Copyright (c) 2020 - present, Roland Munguia
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #ifndef IMGUI_CONSOLE_H

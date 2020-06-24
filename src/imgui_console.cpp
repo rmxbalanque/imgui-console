@@ -1,4 +1,4 @@
-// Copyright (c) 2020, Roland Munguia
+// Copyright (c) 2020 - present, Roland Munguia
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #pragma once
@@ -200,6 +200,10 @@ void ImGuiConsole::LogWindow()
 		static const float timestamp_width = ImGui::CalcTextSize("00:00:00:0000").x;    // Timestamp.
 		int count = 0;                                                                       // Item count.
 
+		// Wrap items.
+		ImGui::PushTextWrapPos();
+
+		// Display items.
 		for (const auto &item : m_ConsoleSystem.items())
 		{
 			// Exit if word is filtered.
@@ -207,9 +211,10 @@ void ImGuiConsole::LogWindow()
 				continue;
 
 			// Spacing between commands.
-			if (item.m_Type == csys::COMMAND && count++ != 0)
+			if (item.m_Type == csys::COMMAND)
 			{
-				ImGui::Dummy(ImVec2(-1, ImGui::GetFontSize()));
+				if (m_TimeStamps) ImGui::PushTextWrapPos(ImGui::GetColumnWidth() - timestamp_width);	// Wrap before timestamps start.
+				if (count++ != 0) ImGui::Dummy(ImVec2(-1, ImGui::GetFontSize()));							// No space for the first command.
 			}
 
 			// Items.
@@ -224,9 +229,13 @@ void ImGuiConsole::LogWindow()
 				ImGui::TextUnformatted(item.get().data());
 			}
 
+
 			// Time stamp.
 			if (item.m_Type == csys::COMMAND && m_TimeStamps)
 			{
+				// No wrap for timestamps
+				ImGui::PopTextWrapPos();
+
 				// Right align.
 				ImGui::SameLine(ImGui::GetColumnWidth(-1) - timestamp_width);
 
@@ -235,8 +244,12 @@ void ImGuiConsole::LogWindow()
 				ImGui::Text("%02d:%02d:%02d:%04d", ((item.m_TimeStamp / 1000 / 3600) % 24), ((item.m_TimeStamp / 1000 / 60) % 60),
 							((item.m_TimeStamp / 1000) % 60), item.m_TimeStamp % 1000);
 				ImGui::PopStyleColor();
+
 			}
 		}
+
+		// Stop wrapping since we are done displaying console items.
+		ImGui::PopTextWrapPos();
 
 		// Auto-scroll logs.
 		if ((m_ScrollToBottom && (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() || m_AutoScroll)))
