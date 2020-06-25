@@ -160,12 +160,12 @@ void ImGuiConsole::DefaultSettings()
 
 void ImGuiConsole::RegisterConsoleCommands()
 {
-	m_ConsoleSystem.registerCommand("clear", "Clear console log", [&]()
+	m_ConsoleSystem.RegisterCommand("clear", "Clear console log", [this]()
 	{
-		m_ConsoleSystem.items().clear();
+		m_ConsoleSystem.Items().clear();
 	});
 
-	m_ConsoleSystem.registerCommand("filter", "Set screen filter", [&](csys::String filter)
+	m_ConsoleSystem.RegisterCommand("filter", "Set screen filter", [this](const csys::String & filter)
 	{
 		// Reset filter buffer.
 		std::memset(m_TextFilter.InputBuf, '\0', 256);
@@ -178,10 +178,10 @@ void ImGuiConsole::RegisterConsoleCommands()
 
 	}, csys::Arg<csys::String>("filter_str"));
 
-	m_ConsoleSystem.registerCommand("run", "Run given command", [&](csys::String filter)
+	m_ConsoleSystem.RegisterCommand("run", "Run given command", [this](const csys::String & filter)
 	{
 		// Logs command.
-		m_ConsoleSystem.runScript(filter.m_String);
+		m_ConsoleSystem.RunScript(filter.m_String);
 	}, csys::Arg<csys::String>("script_name"));
 }
 
@@ -204,10 +204,10 @@ void ImGuiConsole::LogWindow()
 		ImGui::PushTextWrapPos();
 
 		// Display items.
-		for (const auto &item : m_ConsoleSystem.items())
+		for (const auto &item : m_ConsoleSystem.Items())
 		{
 			// Exit if word is filtered.
-			if (!m_TextFilter.PassFilter(item.get().c_str()))
+			if (!m_TextFilter.PassFilter(item.Get().c_str()))
 				continue;
 
 			// Spacing between commands.
@@ -221,12 +221,12 @@ void ImGuiConsole::LogWindow()
 			if (m_ColoredOutput)
 			{
 				ImGui::PushStyleColor(ImGuiCol_Text, m_ColorPalette[item.m_Type]);
-				ImGui::TextUnformatted(item.get().data());
+				ImGui::TextUnformatted(item.Get().data());
 				ImGui::PopStyleColor();
 			}
 			else
 			{
-				ImGui::TextUnformatted(item.get().data());
+				ImGui::TextUnformatted(item.Get().data());
 			}
 
 
@@ -279,7 +279,7 @@ void ImGuiConsole::InputBar()
 		if (!m_Buffer.empty())
 		{
 			// Run command line input.
-			m_ConsoleSystem.runCommand(m_Buffer);
+			m_ConsoleSystem.RunCommand(m_Buffer);
 
 			// Scroll to bottom after its ran.
 			m_ScrollToBottom = true;
@@ -388,11 +388,11 @@ void ImGuiConsole::MenuBar()
 		if (ImGui::BeginMenu("Scripts"))
 		{
 			// Show registered scripts.
-			for (const auto & scr_pair : m_ConsoleSystem.scripts())
+			for (const auto & scr_pair : m_ConsoleSystem.Scripts())
 			{
 				if (ImGui::MenuItem(scr_pair.first.c_str()))
 				{
-					m_ConsoleSystem.runScript(scr_pair.first);
+					m_ConsoleSystem.RunScript(scr_pair.first);
 					m_ScrollToBottom = true;
 				}
 			}
@@ -401,9 +401,9 @@ void ImGuiConsole::MenuBar()
 			ImGui::Separator();
 			if (ImGui::Button("Reload Scripts", ImVec2(ImGui::GetColumnWidth(), 0)))
 			{
-				for (const auto & scr_pair : m_ConsoleSystem.scripts())
+				for (const auto & scr_pair : m_ConsoleSystem.Scripts())
 				{
-					scr_pair.second->reload();
+					scr_pair.second->Reload();
 				}
 			}
 			ImGui::EndMenu();
@@ -463,12 +463,12 @@ int ImGuiConsole::InputCallback(ImGuiInputTextCallbackData *data)
 			if (startSubtrPos == std::string::npos)
 			{
 				startSubtrPos = 0;
-				console_autocomplete = &console->m_ConsoleSystem.cmdAutocomplete();
+				console_autocomplete = &console->m_ConsoleSystem.CmdAutocomplete();
 			}
 			else
 			{
 				startSubtrPos += 1;
-				console_autocomplete = &console->m_ConsoleSystem.varAutocomplete();
+				console_autocomplete = &console->m_ConsoleSystem.VarAutocomplete();
 			}
 
 			// Validate str
@@ -477,16 +477,16 @@ int ImGuiConsole::InputCallback(ImGuiInputTextCallbackData *data)
 				// Display suggestions on console.
 				if (!console->m_CmdSuggestions.empty())
 				{
-					console->m_ConsoleSystem.log(csys::COMMAND) << "Suggestions: " << csys::endl;
+					console->m_ConsoleSystem.Log(csys::COMMAND) << "Suggestions: " << csys::endl;
 
 					for (const auto &suggestion : console->m_CmdSuggestions)
-						console->m_ConsoleSystem.log(csys::LOG) << suggestion << csys::endl;
+						console->m_ConsoleSystem.Log(csys::LOG) << suggestion << csys::endl;
 
 					console->m_CmdSuggestions.clear();
 				}
 
 				// Get partial completion and suggestions.
-				std::string partial = console_autocomplete->suggestions(trim_str.substr(startSubtrPos, endPos + 1), console->m_CmdSuggestions);
+				std::string partial = console_autocomplete->Suggestions(trim_str.substr(startSubtrPos, endPos + 1), console->m_CmdSuggestions);
 
 				// Autocomplete only when one work is available.
 				if (!console->m_CmdSuggestions.empty() && console->m_CmdSuggestions.size() == 1)
@@ -518,7 +518,7 @@ int ImGuiConsole::InputCallback(ImGuiInputTextCallbackData *data)
 
 			// Init history index
 			if (console->m_HistoryIndex == std::numeric_limits<size_t>::min())
-				console->m_HistoryIndex = console->m_ConsoleSystem.history().get_new_index();
+				console->m_HistoryIndex = console->m_ConsoleSystem.History().GetNewIndex();
 
 			// Traverse history.
 			if (data->EventKey == ImGuiKey_UpArrow)
@@ -527,11 +527,11 @@ int ImGuiConsole::InputCallback(ImGuiInputTextCallbackData *data)
 			}
 			else
 			{
-				if (console->m_HistoryIndex < console->m_ConsoleSystem.history().size()) ++(console->m_HistoryIndex);
+				if (console->m_HistoryIndex < console->m_ConsoleSystem.History().Size()) ++(console->m_HistoryIndex);
 			}
 
 			// Get history.
-			std::string prevCommand = console->m_ConsoleSystem.history()[console->m_HistoryIndex];
+			std::string prevCommand = console->m_ConsoleSystem.History()[console->m_HistoryIndex];
 
 			// Insert commands.
 			data->InsertChars(data->CursorPos, prevCommand.data());
