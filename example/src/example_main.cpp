@@ -6,13 +6,24 @@
 #include <stdio.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "imgui_console.h"
 
-static void glfw_error_callback(int error, const char* description)
+static void glfw_error_callback(int error, const char *description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
-int main(int, char**)
+csys::ItemLog &operator<<(csys::ItemLog &log, ImVec4 &vec)
+{
+    log << "ImVec4: [" << std::to_string(vec.x) << ", "
+        << std::to_string(vec.y) << ", "
+        << std::to_string(vec.z) << ", "
+        << std::to_string(vec.w) << "]";
+    return log;
+}
+
+
+int main(int, char **)
 {
     // Setup window
     glfwSetErrorCallback(glfw_error_callback);
@@ -29,13 +40,13 @@ int main(int, char**)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
 #else
     // GL 3.0 + GLSL 130
-    const char* glsl_version = "#version 130";
+    const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "ImGui Console Basic Example", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "ImGui Console Basic Example", NULL, NULL);
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
@@ -52,7 +63,8 @@ int main(int, char**)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO &io = ImGui::GetIO();
+    (void) io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
@@ -61,7 +73,7 @@ int main(int, char**)
     ImGui::StyleColorsDark();
 
     // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-    ImGuiStyle& style = ImGui::GetStyle();
+    ImGuiStyle &style = ImGui::GetStyle();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         style.WindowRounding = 0.0f;
@@ -75,6 +87,36 @@ int main(int, char**)
     // Our state
     ImVec4 clear_color = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
 
+    ///////////////////////////////////////////////////////////////////////////
+    // IMGUI CONSOLE //////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////
+
+    // Create ImGui Console
+    ImGuiConsole console;
+
+    // Register variables
+    console.System().RegisterVariable("background_color", clear_color);
+
+    // Register scripts
+    console.System().RegisterScript("test_script", "./console.script");
+
+    // Register custom commands
+    console.System().RegisterCommand("random_background_color", "Assigns a random color to the background application",
+                                     [&clear_color]()
+                                     {
+                                         clear_color.x = (rand() % 256) / 256.f;
+                                         clear_color.y = (rand() % 256) / 256.f;
+                                         clear_color.z = (rand() % 256) / 256.f;
+                                         clear_color.w = (rand() % 256) / 256.f;
+                                     });
+    console.System().RegisterCommand("reset_background_color", "Reset background color to its original value",
+                                     [&clear_color, val = clear_color]()
+                                     {
+                                         clear_color = val;
+                                     });
+
+    ///////////////////////////////////////////////////////////////////////////
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -86,8 +128,8 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // TODO: Show ImGuiConsole window
-
+        // ImGui Console
+        console.Draw();
 
         // Show the big demo window
         ImGui::ShowDemoWindow();
@@ -100,11 +142,11 @@ int main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    	
+
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
-            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            GLFWwindow *backup_current_context = glfwGetCurrentContext();
             ImGui::UpdatePlatformWindows();
             ImGui::RenderPlatformWindowsDefault();
             glfwMakeContextCurrent(backup_current_context);

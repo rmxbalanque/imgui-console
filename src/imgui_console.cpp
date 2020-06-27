@@ -1,11 +1,12 @@
 // Copyright (c) 2020 - present, Roland Munguia
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#pragma once
+//#pragma once
 
 #include <string>
+#include "imgui_console.h"
 #include "imgui_internal.h"
-#include "imgui.h"
+#include <cstring>
 
 // The following three functions (InputTextCallback_UserData, InputTextCallback, InputText) are obtained from misc/cpp/imgui_stdlib.h
 // Which are licensed under MIT License (https://github.com/ocornut/imgui/blob/master/LICENSE.txt)
@@ -617,9 +618,9 @@ void ImGuiConsole::SettingsHandler_WriteAll(ImGuiContext *ctx, ImGuiSettingsHand
     // Get console.
     auto console = static_cast<ImGuiConsole *>(handler->UserData);
 
-#define INI_CONSOLE_SAVE_COLOR(type) buf->appendf(#type"=%i,%i,%i,%i\n", (int)(console->m_ColorPalette[type].x * 255),
-                                                                         (int)(console->m_ColorPalette[type].y * 255),
-                                                                         (int)(console->m_ColorPalette[type].z * 255),
+#define INI_CONSOLE_SAVE_COLOR(type) buf->appendf(#type"=%i,%i,%i,%i\n", (int)(console->m_ColorPalette[type].x * 255),\
+                                                                         (int)(console->m_ColorPalette[type].y * 255),\
+                                                                         (int)(console->m_ColorPalette[type].z * 255),\
                                                                          (int)(console->m_ColorPalette[type].w * 255))
 
 #define INI_CONSOLE_SAVE_FLOAT(var) buf->appendf(#var"=%.3f\n", console->var)

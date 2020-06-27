@@ -7,13 +7,15 @@ add_executable(example "./src/example_main.cpp"
                        "./thirdparty/imgui/imgui_impl_glfw.cpp"
                        "./thirdparty/imgui/imgui_impl_opengl3.cpp")
 
-target_compile_definitions(example PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
+target_compile_definitions(example PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)   # Using GLAD
+target_compile_features(example PUBLIC cxx_std_17)                          # Use C++17
 
 # IMGUI Library
 add_library(imgui STATIC "./thirdparty/imgui/imgui.cpp"
                          "./thirdparty/imgui/imgui_widgets.cpp"
                          "./thirdparty/imgui/imgui_draw.cpp"
                          "./thirdparty/imgui/imgui_demo.cpp")
+
 target_include_directories(imgui PUBLIC "./thirdparty/imgui")
 target_link_libraries(example PRIVATE imgui)
 
@@ -30,6 +32,21 @@ pkg_search_module(GLFW REQUIRED glfw3)
 target_link_libraries(example PRIVATE ${GLFW_LIBRARIES})
 target_include_directories(example PRIVATE "${GLFW_INCLUDE_DIRS}")
 
+#CSYS
+add_library(csys INTERFACE)
+target_include_directories(csys INTERFACE "/include/csys")
+target_compile_features(csys INTERFACE cxx_std_17)
+
+# IMGUI Console
+add_library(imgui_console STATIC "../src/imgui_console.cpp" "../include/imgui_console/imgui_console.h")
+target_include_directories(imgui_console PUBLIC "./thirdparty/imgui" "../include/imgui_console")
+target_compile_features(imgui_console PUBLIC cxx_std_17)
+target_link_libraries(imgui_console PRIVATE csys)
+target_link_libraries(example PUBLIC imgui_console)
+
+# Misc
+# Copy script to binary directory for testing.
+configure_file("scripts/console.script" "${CMAKE_CURRENT_BINARY_DIR}/console.script" COPYONLY)
 
 
 

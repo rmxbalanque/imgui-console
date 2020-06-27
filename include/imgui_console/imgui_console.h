@@ -6,12 +6,9 @@
 #pragma once
 
 #include "csys/system.h"
+#include "imgui.h"
 
-// Forward declarations.
 class ImGuiSettingsHandler;
-class ImGuiContext;
-class ImGuiTextBuffer;
-
 class ImGuiConsole
 {
 public:
@@ -110,7 +107,5 @@ protected:
 
     ///////////////////////////////////////////////////////////////////////////
 };
-
-#include "imgui_console.cpp"
 
 #endif //IMGUI_CONSOLE_H
