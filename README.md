@@ -5,7 +5,7 @@ Console Widget for [Dear ImGui](https://github.com/ocornut/imgui)
 
 ---
 
-imgui-console aims to provide a console that allows the client to easly modify application variables, execute commands and run scripts at run-time. It started as a widget to test the [csys library](https://github.com/rmxbalanque/csys) during its development. While it was developed as a an example use case for _csys_ I believe it could be useful for other projects.
+imgui-console aims to provide a console that allows the client to easly modify application variables, execute commands and run scripts at run-time. It started as a widget to test the [csys library](https://github.com/rmxbalanque/csys) during its development. While it was developed as an example use case for _csys_, I believe it can be useful for other projects.
 
 ## Features
 - Smart scrolling, timetamps, log filtering, colored console output.
