@@ -20,28 +20,38 @@ target_include_directories(imgui PUBLIC "./thirdparty/imgui")
 target_link_libraries(example PRIVATE imgui)
 
 # Glad
-add_library(glad SHARED "./thirdparty/glad/src/glad.c")
+if (WIN32)
+    set(GLAD_ACCESS STATIC)
+else()
+    set(GLAD_ACCESS SHARED)
+endif()
+add_library(glad ${GLAD_ACCESS} "./thirdparty/glad/src/glad.c")
 target_include_directories(glad PUBLIC "./thirdparty/glad/include")
 target_link_libraries(example PRIVATE glad)
 
-# NOTE: You will need to install glfw for the example to work. (http://www.glfw.org)
+# Install glfw. (For windows the example includes a bundled glfw)
 # Linux: apt-get install libglfw-dev
 #GLFW
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-target_link_libraries(example PRIVATE ${GLFW_LIBRARIES})
-target_include_directories(example PRIVATE "${GLFW_INCLUDE_DIRS}")
+if (WIN32)
+    target_include_directories(example PRIVATE "${CMAKE_SOURCE_DIR}/example/thirdparty/glfw/include")
+    target_link_libraries(example PRIVATE "${CMAKE_SOURCE_DIR}/example/thirdparty/glfw/lib-vc2015/glfw3.lib")
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(GLFW REQUIRED glfw3)
+    target_link_libraries(example PRIVATE ${GLFW_LIBRARIES})
+    target_include_directories(example PRIVATE "${GLFW_INCLUDE_DIRS}")
+endif()
 
 #CSYS
 add_library(csys INTERFACE)
-target_include_directories(csys INTERFACE "/include/csys")
+target_include_directories(csys INTERFACE "${CMAKE_SOURCE_DIR}/include")
 target_compile_features(csys INTERFACE cxx_std_17)
 
 # IMGUI Console
 add_library(imgui_console STATIC "../src/imgui_console.cpp" "../include/imgui_console/imgui_console.h")
 target_include_directories(imgui_console PUBLIC "./thirdparty/imgui" "../include/imgui_console")
 target_compile_features(imgui_console PUBLIC cxx_std_17)
-target_link_libraries(imgui_console PRIVATE csys)
+target_link_libraries(imgui_console PUBLIC csys)
 target_link_libraries(example PUBLIC imgui_console)
 
 # Misc

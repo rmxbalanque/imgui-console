@@ -7,6 +7,7 @@
 
 #include "csys/system.h"
 #include "imgui.h"
+#include <array>
 
 class ImGuiSettingsHandler;
 class ImGuiConsole
