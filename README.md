@@ -11,3 +11,7 @@ See [example project](/example) for usage and integration details.
 - Smart scrolling, timetamps, log filtering, colored console output.
 - Console settings and visuals are preserved through sessions. (Information stored in the imgui.ini)
 - All features that _csys_ provides. (Tab completion, commands, variables, scripts, etc)
+
+## Binaries
+Pre-compiled binaires of the example project for imgui console.
+- [Windows](https://drive.google.com/uc?export=download&id=1aDuMkUG-enGSPa9SxILljgCFPuR0guPa)
