@@ -60,7 +60,7 @@ namespace csys
         
         /*!
          * \brief
-         *      Parse given command and run it
+         *      Parse given command line input and run it
          * \param line
          *      Command line string
          */
@@ -201,57 +201,66 @@ namespace csys
         }
 
         /*!
-         *
+         * \brief
+         *      Register's a variable within the system
          * \tparam T
-         *      Type of the variable to be registered.
+         *      Type of the variable
+         * \tparam Types
+         *      Type of arguments that type T can be constructed with
          * \param name
-         *      Name under which the variable will be registered on.
+         *      Name of the variable
          * \param var
-         *      Variable to be registered/exposed to the console.
+         *      The variable to register
+         * \param args
+         *      List of csys::Arg to be used for the construction of type T
          * \note
-         *      Variable is assumed to be in memory for the life of the program!
+         *      Type T requires an assignment operator, and constructor that takes type 'Types...'
+         *      Param 'var' is assumed to have a valid life-time up until it is unregistered or the program ends
          */
-        template<typename T>
-        void RegisterVariable(const String &name, T &var)
+        template<typename T, typename ...Types>
+        void RegisterVariable(const String &name, T &var, Arg<Types>... args)
         {
-            // Disable.
-            m_RegisterCommandSuggestion = false;
+            static_assert(std::is_constructible_v<T, Types...>, "Type of var 'T' can not be constructed with types of 'Types'");
+            static_assert(sizeof... (Types) != 0, "Empty variadic list");
 
-            // Make sure only one word was passed in
-            size_t name_index = 0;
-            auto range = name.NextPoi(name_index);
-            if (name.NextPoi(name_index).first != name.End())
-                throw csys::Exception("ERROR: Whitespace separated variable names are forbidden");
-
-            // Get variable name
-            std::string var_name = name.m_String.substr(range.first, range.second - range.first);
-
-            // Set command
-            const auto SetFunction = [&var](T val) {
-                var = val;
-            };
-
-            // Get Command
-            const auto GetFunction = [this, &var]() {
-                m_CommandData.log(LOG) << var << endl;
-            };
+            // Register get command
+            auto var_name = RegisterVariableAux(name, var);
 
             // Register set command
-            m_Commands["set " + var_name] = std::make_unique<Command<decltype(SetFunction), Arg<T>>>("set " + var_name,
-                                                                                                     "Sets the variable " +
-                                                                                                     var_name,
-                                                                                                     SetFunction,
-                                                                                                     Arg<T>(var_name));
+            auto setter = [&var](Types... params){ var = T(params...); };
+            m_Commands["set " + var_name] = std::make_unique<Command<decltype(setter), Arg<Types>...>>("set " + var_name,
+                                                                                        "Sets the variable " + var_name,
+                                                                                        setter, args...);
+        }
+
+        /*!
+         * \brief
+         *      Register's a variable within the system
+         * \tparam T
+         *      Type of the variable
+         * \tparam Types
+         *      Type of arguments that type T can be constructed with
+         * \param name
+         *      Name of the variable
+         * \param var
+         *      The variable to register
+         * \param setter
+         *      Custom setter that runs when command set 'name' is invoked
+         * \note
+         *      The setter must have dceltype of void(decltype(var)&, Types...)
+         *      Param 'var' is assumed to have a valid life-time up until it is unregistered or the program ends
+         */
+        template<typename T, typename ...Types>
+        void RegisterVariable(const String &name, T &var, void(*setter)(T&, Types...))
+        {
             // Register get command
-            m_Commands["get " + var_name] = std::make_unique<Command<decltype(GetFunction)>>("get " + var_name,
-                                                                                             "Gets the variable " +
-                                                                                             var_name, GetFunction);
+            auto var_name = RegisterVariableAux(name, var);
 
-            // Enable again.
-            m_RegisterCommandSuggestion = true;
-
-            // Register variable
-            m_VariableSuggestionTree.Insert(var_name);
+            // Register set command
+            auto setter_l = [&var, setter](Types... args){ setter(var, args...); };
+            m_Commands["set " + var_name] = std::make_unique<Command<decltype(setter_l), Arg<Types>...>>("set " + var_name,
+                                                                                        "Sets the variable " + var_name,
+                                                                                         setter_l, Arg<Types>("")...);
         }
 
         /*!
@@ -288,7 +297,40 @@ namespace csys
          */
         void UnregisterScript(const std::string &script_name);
 
-    private:
+    protected:
+        template<typename T>
+        std::string RegisterVariableAux(const String &name, T &var)
+        {
+            // Disable.
+            m_RegisterCommandSuggestion = false;
+
+            // Make sure only one word was passed in
+            size_t name_index = 0;
+            auto range = name.NextPoi(name_index);
+            if (name.NextPoi(name_index).first != name.End())
+                throw csys::Exception("ERROR: Whitespace separated variable names are forbidden");
+
+            // Get variable name
+            std::string var_name = name.m_String.substr(range.first, range.second - range.first);
+
+            // Get Command
+            const auto GetFunction = [this, &var]() {
+                m_ItemLog.log(LOG) << var << endl;
+            };
+
+            // Register get command
+            m_Commands["get " + var_name] = std::make_unique<Command<decltype(GetFunction)>>("get " + var_name,
+                                                                                             "Gets the variable " +
+                                                                                             var_name, GetFunction);
+
+            // Enable again.
+            m_RegisterCommandSuggestion = true;
+
+            // Register variable
+            m_VariableSuggestionTree.Insert(var_name);
+
+            return var_name;
+        }
 
         void ParseCommandLine(const String &line);                                   //!< Parse command line and execute command
 
@@ -296,7 +338,7 @@ namespace csys
         AutoComplete m_CommandSuggestionTree;                                        //!< Autocomplete Ternary Search Tree for commands
         AutoComplete m_VariableSuggestionTree;                                       //!< Autocomplete Ternary Search Tree for registered variables
         CommandHistory m_CommandHistory;                                             //!< History of executed commands
-        ItemLog m_CommandData;                                                       //!< Console Items (Logging)
+        ItemLog m_ItemLog;                                                           //!< Console Items (Logging)
         std::unordered_map<std::string, std::unique_ptr<Script>> m_Scripts;          //!< Scripts
         bool m_RegisterCommandSuggestion = true;                                     //!< Flag that determines if commands will be registered for autocomplete.
     };
@@ -307,3 +349,8 @@ namespace csys
 #endif
 
 #endif
+
+// void (T&, int, float...);
+
+// registaerVariable("name", var, Arg<int>...); //c
+// registaerVariable("name", var, setter);      //d

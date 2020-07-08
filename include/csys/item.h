@@ -183,7 +183,7 @@ namespace csys
 
         LOG_BASIC_TYPE_DECL(char);
 
-    private:
+    protected:
         std::vector<Item> m_Items;
     };
 }

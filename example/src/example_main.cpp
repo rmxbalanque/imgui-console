@@ -15,13 +15,22 @@ static void glfw_error_callback(int error, const char *description)
 
 csys::ItemLog &operator<<(csys::ItemLog &log, ImVec4 &vec)
 {
-    log << "ImVec4: [" << std::to_string(vec.x) << ", "
-        << std::to_string(vec.y) << ", "
-        << std::to_string(vec.z) << ", "
-        << std::to_string(vec.w) << "]";
+    log << "ImVec4: [" << vec.x << ", "
+        << vec.y << ", "
+        << vec.z << ", "
+        << vec.w << "]";
     return log;
 }
 
+static void imvec4_setter(ImVec4 & my_type, std::vector<int> vec)
+{
+    if (vec.size() < 4) return;
+
+    my_type.x = vec[0]/255.f;
+    my_type.y = vec[1]/255.f;
+    my_type.z = vec[2]/255.f;
+    my_type.w = vec[3]/255.f;
+}
 
 int main(int, char **)
 {
@@ -95,7 +104,7 @@ int main(int, char **)
     ImGuiConsole console;
 
     // Register variables
-    console.System().RegisterVariable("background_color", clear_color);
+    console.System().RegisterVariable("background_color", clear_color, imvec4_setter);
 
     // Register scripts
     console.System().RegisterScript("test_script", "./console.script");
@@ -114,6 +123,13 @@ int main(int, char **)
                                      {
                                          clear_color = val;
                                      });
+
+    // Log example information:
+    console.System().Log(csys::ItemType::INFO) << "Welcome to the imgui-console example!" << csys::endl;
+    console.System().Log(csys::ItemType::INFO) << "The following variables have been exposed to the console:" << csys::endl << csys::endl;
+    console.System().Log(csys::ItemType::INFO) << "\tbackground_color - set: [int int int int]" << csys::endl;
+    console.System().Log(csys::ItemType::INFO) << csys::endl << "Try running the following command:" << csys::endl;
+    console.System().Log(csys::ItemType::INFO) << "\tset background_color [255 0 0 255]" << csys::endl << csys::endl;
 
     ///////////////////////////////////////////////////////////////////////////
 

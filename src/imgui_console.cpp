@@ -180,7 +180,7 @@ void ImGuiConsole::RegisterConsoleCommands()
 
     }, csys::Arg<csys::String>("filter_str"));
 
-    m_ConsoleSystem.RegisterCommand("run", "Run given command", [this](const csys::String &filter)
+    m_ConsoleSystem.RegisterCommand("run", "Run given script", [this](const csys::String &filter)
     {
         // Logs command.
         m_ConsoleSystem.RunScript(filter.m_String);

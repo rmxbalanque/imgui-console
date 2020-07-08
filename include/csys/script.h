@@ -106,7 +106,7 @@ namespace csys
          */
         const std::vector<std::string> &Data();
 
-    private:
+    protected:
         std::vector<std::string> m_Data;    //!< Commands in script
         std::string m_Path;                 //!< Path of script file
         bool m_FromMemory;                  //!< Flag to specify if script was loaded from file or memory

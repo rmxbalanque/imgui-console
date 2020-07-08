@@ -138,7 +138,7 @@ namespace csys
          */
         size_t Capacity();
 
-    private:
+    protected:
         unsigned int m_Record;                 //!< Amount of commands recorded
         unsigned int m_MaxRecord;              //!< Maximum command record to keep track of
         std::vector<std::string> m_History;    //!< Console command history

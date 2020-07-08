@@ -55,7 +55,7 @@ namespace csys
     CSYS_INLINE System::System(const System &rhs) : m_CommandSuggestionTree(rhs.m_CommandSuggestionTree),
                                                     m_VariableSuggestionTree(rhs.m_VariableSuggestionTree),
                                                     m_CommandHistory(rhs.m_CommandHistory),
-                                                    m_CommandData(rhs.m_CommandData),
+                                                    m_ItemLog(rhs.m_ItemLog),
                                                     m_RegisterCommandSuggestion(rhs.m_RegisterCommandSuggestion)
     {
         // Copy commands.
@@ -86,7 +86,7 @@ namespace csys
         m_CommandSuggestionTree = rhs.m_CommandSuggestionTree;
         m_VariableSuggestionTree = rhs.m_VariableSuggestionTree;
         m_CommandHistory = rhs.m_CommandHistory;
-        m_CommandData = rhs.m_CommandData;
+        m_ItemLog = rhs.m_ItemLog;
 
         // Copy scripts.
         for (const auto &pair: rhs.m_Scripts)
@@ -121,12 +121,12 @@ namespace csys
         // Exit if not found.
         if (script_pair == m_Scripts.end())
         {
-            m_CommandData.log(ERROR) << "Script \"" << script_name << "\" not found" << csys::endl;
+            m_ItemLog.log(ERROR) << "Script \"" << script_name << "\" not found" << csys::endl;
             return;
         }
 
         // About to run script.
-        m_CommandData.log(INFO) << "Running \"" << script_name << "\"" << csys::endl;
+        m_ItemLog.log(INFO) << "Running \"" << script_name << "\"" << csys::endl;
 
         // Load if script is empty.
         if (script_pair->second->Data().empty())
@@ -225,9 +225,9 @@ namespace csys
 
     CSYS_INLINE CommandHistory &System::History() { return m_CommandHistory; }
 
-    CSYS_INLINE std::vector<Item> &System::Items() { return m_CommandData.Items(); }
+    CSYS_INLINE std::vector<Item> &System::Items() { return m_ItemLog.Items(); }
 
-    CSYS_INLINE ItemLog &System::Log(ItemType type) { return m_CommandData.log(type); }
+    CSYS_INLINE ItemLog &System::Log(ItemType type) { return m_ItemLog.log(type); }
 
     CSYS_INLINE std::unordered_map<std::string, std::unique_ptr<CommandBase>> &System::Commands() { return m_Commands; }
 
@@ -294,7 +294,7 @@ namespace csys
 
             // Log output.
             if (cmd_out.m_Type != NONE)
-                m_CommandData.Items().emplace_back(cmd_out);
+                m_ItemLog.Items().emplace_back(cmd_out);
         }
     }
 }

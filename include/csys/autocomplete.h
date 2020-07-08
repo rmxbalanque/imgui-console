@@ -339,7 +339,7 @@ namespace csys
          */
         std::unique_ptr<sVector> Suggestions(const char *prefix);
 
-    private:
+    protected:
 
         /*!
          * \param[in] root

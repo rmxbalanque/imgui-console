@@ -123,27 +123,6 @@ namespace csys
 
     /*!
      * \brief
-     *      Generic templated function for unsupported types
-     * \tparam T
-     *      Type of argument to parse
-     * \param input
-     *      Input to the command for this class to parse its argument
-     * \param start
-     *      Start of this argument
-     */
-    template<typename T>
-    inline ArgumentParser<T>::ArgumentParser(String &input, size_t &start)
-    {
-        // getting rid of warnings
-        if (input.End() == start)
-        {}
-
-        // TYPE T NOT SUPPORTED
-        throw Exception("Unsupported type: " + std::string(typeid(T).name()));
-    }
-
-    /*!
-     * \brief
      *      Macro for template specialization, used for cleaner code reuse
      */
 #define ARG_PARSE_BASE_SPEC(TYPE) \
@@ -171,7 +150,7 @@ namespace csys
     auto range = input.NextPoi(start); \
     try \
     { \
-      m_Value = (TYPE)FUNCTION(input.m_String, &range.first); \
+      m_Value = (TYPE)FUNCTION(ARG_PARSE_SUBSTR(range), &range.first); \
     } \
     catch (const std::out_of_range&) \
     { \

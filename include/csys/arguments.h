@@ -15,6 +15,29 @@ namespace csys
 {
     /*!
      * \brief
+     *      Macro for supporting trivial types
+     */
+#define SUPPORT_TYPE(TYPE, TYPE_NAME)\
+    template<> struct is_supported_type<TYPE> { static constexpr bool value = true; }; \
+    template<> \
+    struct CSYS_API ArgData<TYPE> \
+    { \
+      explicit ArgData(String name) : m_Name(std::move(name)), m_Value() {} \
+      const String m_Name; \
+      String m_TypeName = TYPE_NAME; \
+      TYPE m_Value; \
+    };
+
+    using NULL_ARGUMENT = void (*)();    //!< Null argument typedef
+
+    /*!
+     * \brief
+     *      Base case struct where a type is not supported
+     */
+    template<typename> struct is_supported_type { static constexpr bool value = false; };
+
+    /*!
+     * \brief
      *      Wrapper around a given data type to name it
      * \tparam T
      *      Type of data that must have a default constructor
@@ -36,6 +59,56 @@ namespace csys
         T m_Value;                                 //!< Actual value
     };
 
+    //! Supported types
+    SUPPORT_TYPE(String, "String")
+
+    SUPPORT_TYPE(bool, "Boolean")
+
+    SUPPORT_TYPE(char, "Char")
+
+    SUPPORT_TYPE(unsigned char, "Unsigned_Char")
+
+    SUPPORT_TYPE(short, "Signed_Short")
+
+    SUPPORT_TYPE(unsigned short, "Unsigned_Short")
+
+    SUPPORT_TYPE(int, "Signed_Int")
+
+    SUPPORT_TYPE(unsigned int, "Unsigned_Int")
+
+    SUPPORT_TYPE(long, "Signed_Long")
+
+    SUPPORT_TYPE(unsigned long, "Unsigned_Long")
+
+    SUPPORT_TYPE(long long, "Signed_Long_Long")
+
+    SUPPORT_TYPE(unsigned long long, "Unsigned_Long_Long")
+
+    SUPPORT_TYPE(float, "Float")
+
+    SUPPORT_TYPE(double, "Double")
+
+    SUPPORT_TYPE(long double, "Long_Double")
+
+    //! Supported containers
+    template<typename U> struct is_supported_type<std::vector<U>> { static constexpr bool value = is_supported_type<U>::value; };
+    template<typename T>
+    struct CSYS_API ArgData<std::vector<T>>
+    {
+        /*!
+         * \brief
+         *      Constructor for a vector argument
+         * \param name
+         *      Name for argument
+         */
+        explicit ArgData(String name) : m_Name(std::move(name))
+        {}
+
+        const String m_Name;                                                                   //!< Name of argument
+        String m_TypeName = std::string("Vector_Of_") + ArgData<T>("").m_TypeName.m_String;    //!< Type name
+        std::vector<T> m_Value;                                                                //!< Vector of data
+    };
+
     /*!
      * \brief
      *      Wrapper around an argument for use of parsing a command line
@@ -45,7 +118,17 @@ namespace csys
     template<typename T>
     struct CSYS_API Arg
     {
-        using ValueType = T;    //!< Type of this argument
+        /*!
+         * \brief
+         *      Is true if type of U is a supported type
+         * \tparam U
+         *      Type to check if it is supported
+         */
+        template<typename U>
+        static constexpr bool is_supported_type_v = is_supported_type<U>::value;
+    public:
+
+        using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;    //!< Type of this argument
 
         /*!
          * \brief
@@ -54,7 +137,10 @@ namespace csys
          *      Name of the argument
          */
         explicit Arg(const String &name) : m_Arg(name)
-        {}
+        {
+            static_assert(is_supported_type_v<ValueType>,
+                    "ValueType 'T' is not supported, see 'Supported types' for more help");
+        }
 
         /*!
          * \brief
@@ -92,8 +178,6 @@ namespace csys
         ArgData<ValueType> m_Arg;    //!< Data relating to this argument
     };
 
-    using NULL_ARGUMENT = void (*)();    //!< Null argument typedef
-
     /*!
      * \brief
      *      Template specialization for a null argument that gets appended to a command's argument list to check if more
@@ -118,133 +202,6 @@ namespace csys
                 throw Exception("Too many arguments were given", input.m_String);
             return *this;
         }
-    };
-
-    /*!
-     * \brief
-     *      Generalized macro for specialization's of built-in types
-     */
-#define ARG_BASE_SPEC(TYPE, TYPE_NAME) \
-  template<>\
-  struct CSYS_API ArgData<TYPE> \
-  { \
-    explicit ArgData(String name) : m_Name(std::move(name)), m_Value() {} \
-    const String m_Name; \
-    String m_TypeName = TYPE_NAME; \
-    TYPE m_Value; \
-  };
-
-    /*!
-     * \brief
-     *      Template specialization for string argument
-     */
-    ARG_BASE_SPEC(String, "String")
-
-    /*!
-     * \brief
-     *      Template specialization for bool argument
-     */
-    ARG_BASE_SPEC(bool, "Boolean")
-
-    /*!
-     * \brief
-     *      Template specialization for char argument
-     */
-    ARG_BASE_SPEC(char, "Char")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned char argument
-     */
-    ARG_BASE_SPEC(unsigned char, "Unsigned_Char")
-
-    /*!
-     * \brief
-     *      Template specialization for short argument
-     */
-    ARG_BASE_SPEC(short, "Signed_Short")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned short argument
-     */
-    ARG_BASE_SPEC(unsigned short, "Unsigned_Short")
-
-    /*!
-     * \brief
-     *      Template specialization for int argument
-     */
-    ARG_BASE_SPEC(int, "Signed_Int")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned int argument
-     */
-    ARG_BASE_SPEC(unsigned int, "Unsigned_Int")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned long argument
-     */
-    ARG_BASE_SPEC(long, "Signed_Long")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned long argument
-     */
-    ARG_BASE_SPEC(unsigned long, "Unsigned_Long")
-
-    /*!
-     * \brief
-     *      Template specialization for long long argument
-     */
-    ARG_BASE_SPEC(long long, "Signed_Long_Long")
-
-    /*!
-     * \brief
-     *      Template specialization for unsigned long long argument
-     */
-    ARG_BASE_SPEC(unsigned long long, "Unsigned_Long_Long")
-
-    /*!
-     * \brief
-     *      Template specialization for float argument
-     */
-    ARG_BASE_SPEC(float, "Float")
-
-    /*!
-     * \brief
-     *      Template specialization for double argument
-     */
-    ARG_BASE_SPEC(double, "Double")
-
-    /*!
-     * \brief
-     *      Template specialization for long double argument
-     */
-    ARG_BASE_SPEC(long double, "Long_Double")
-
-    /*!
-     * \brief
-     *      Template specialization for a vector of N vector of types argument
-     * \tparam T
-     *      Type of vector
-     */
-    template<typename T>
-    struct CSYS_API ArgData<std::vector<T>>
-    {
-        /*!
-         * \brief
-         *      Constructor for a vector argument
-         * \param name
-         *      Name for argument
-         */
-        explicit ArgData(String name) : m_Name(std::move(name))
-        {}
-
-        const String m_Name;                                                                   //!< Name of argument
-        String m_TypeName = std::string("Vector_Of_") + ArgData<T>("").m_TypeName.m_String;    //!< Type name
-        std::vector<T> m_Value;                                                                //!< Vector of data
     };
 }
 
