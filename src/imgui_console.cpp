@@ -152,12 +152,12 @@ void ImGuiConsole::DefaultSettings()
 
     // Style
     m_WindowAlpha = 1;
-    m_ColorPalette[COL_COMMAND] = ImVec4(1, 1, 1, 1);
-    m_ColorPalette[COL_LOG] = ImVec4(1, 1, 1, 0.5);
-    m_ColorPalette[COL_WARNING] = ImVec4(1.0, 0.87, 0.37, 1);
-    m_ColorPalette[COL_ERROR] = ImVec4(1, 0.365, 0.365, 1);
-    m_ColorPalette[COL_INFO] = ImVec4(0.46, 0.96, 0.46, 1);
-    m_ColorPalette[COL_TIMESTAMP] = ImVec4(1, 1, 1, 0.5);
+    m_ColorPalette[COL_COMMAND] = ImVec4(1.f, 1.f, 1.f, 1.f);
+    m_ColorPalette[COL_LOG] = ImVec4(1.f, 1.f, 1.f, 0.5f);
+    m_ColorPalette[COL_WARNING] = ImVec4(1.0f, 0.87f, 0.37f, 1.f);
+    m_ColorPalette[COL_ERROR] = ImVec4(1.f, 0.365f, 0.365f, 1.f);
+    m_ColorPalette[COL_INFO] = ImVec4(0.46f, 0.96f, 0.46f, 1.f);
+    m_ColorPalette[COL_TIMESTAMP] = ImVec4(1.f, 1.f, 1.f, 0.5f);
 }
 
 void ImGuiConsole::RegisterConsoleCommands()
@@ -382,7 +382,7 @@ void ImGuiConsole::MenuBar()
 
             // Window transparency.
             ImGui::TextUnformatted("Background");
-            ImGui::SliderFloat("Transparency##", &m_WindowAlpha, 0.1, 1);
+            ImGui::SliderFloat("Transparency##", &m_WindowAlpha, 0.1f, 1.f);
 
             ImGui::EndMenu();
         }
@@ -580,6 +580,10 @@ void ImGuiConsole::SettingsHandler_ReadLine(ImGuiContext *ctx, ImGuiSettingsHand
     // Ensure console doesn't reset variables.
     console->m_LoadedFromIni = true;
 
+// Disable warning regarding sscanf when using MVSC
+#pragma warning( push )
+#pragma warning( disable:4996 )
+
 #define INI_CONSOLE_LOAD_COLOR(type) (std::sscanf(line, #type"=%i,%i,%i,%i", &r, &g, &b, &a) == 4) { console->m_ColorPalette[type] = ImColor(r, g, b, a); }
 #define INI_CONSOLE_LOAD_FLOAT(var) (std::sscanf(line, #var"=%f", &f) == 1) { console->var = f; }
 #define INI_CONSOLE_LOAD_BOOL(var) (std::sscanf(line, #var"=%i", &b) == 1) {console->var = b == 1;}
@@ -602,6 +606,8 @@ void ImGuiConsole::SettingsHandler_ReadLine(ImGuiContext *ctx, ImGuiSettingsHand
     else if INI_CONSOLE_LOAD_BOOL(m_ColoredOutput)
     else if INI_CONSOLE_LOAD_BOOL(m_FilterBar)
     else if INI_CONSOLE_LOAD_BOOL(m_TimeStamps)
+
+#pragma warning( pop )
 }
 
 void ImGuiConsole::SettingsHandler_ApplyAll(ImGuiContext *ctx, ImGuiSettingsHandler *handler)

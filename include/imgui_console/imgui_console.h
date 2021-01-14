@@ -9,7 +9,7 @@
 #include "imgui.h"
 #include <array>
 
-class ImGuiSettingsHandler;
+struct ImGuiSettingsHandler;
 class ImGuiConsole
 {
 public:
