@@ -3,9 +3,14 @@
 
 //#pragma once
 
+#ifdef ERROR
+#define CACHED_ERROR ERROR
+#undef ERROR
+#endif
+
 #include <string>
-#include "imgui_console.h"
-#include "imgui_internal.h"
+#include "imgui_console/imgui_console.h"
+#include "ImGui/imgui_internal.h"
 #include <cstring>
 
 // The following three functions (InputTextCallback_UserData, InputTextCallback, InputText) are obtained from misc/cpp/imgui_stdlib.h
@@ -654,3 +659,8 @@ void ImGuiConsole::SettingsHandler_WriteAll(ImGuiContext *ctx, ImGuiSettingsHand
     // End saving.
     buf->append("\n");
 }
+
+#ifdef CACHED_ERROR
+#define ERROR CACHED_ERROR
+#undef CACHED_ERROR
+#endif

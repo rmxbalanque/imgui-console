@@ -5,8 +5,13 @@
 #define IMGUI_CONSOLE_H
 #pragma once
 
+#ifdef ERROR
+#define CACHED_ERROR ERROR
+#undef ERROR
+#endif
+
 #include "csys/system.h"
-#include "imgui.h"
+#include "ImGui/imgui.h"
 #include <array>
 
 struct ImGuiSettingsHandler;
@@ -108,5 +113,10 @@ protected:
 
     ///////////////////////////////////////////////////////////////////////////
 };
+
+#ifdef CACHED_ERROR
+#define ERROR CACHED_ERROR
+#undef CACHED_ERROR
+#endif
 
 #endif //IMGUI_CONSOLE_H
