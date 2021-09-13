@@ -107,7 +107,7 @@ namespace csys
             return;
 
         // Log command.
-        Log(csys::ItemType::COMMAND) << line << csys::endl;
+        Log(csys::ItemType::ITEM_TYPE_COMMAND) << line << csys::endl;
 
         // Parse command line.
         ParseCommandLine(line);
@@ -121,12 +121,12 @@ namespace csys
         // Exit if not found.
         if (script_pair == m_Scripts.end())
         {
-            m_ItemLog.log(ERROR) << "Script \"" << script_name << "\" not found" << csys::endl;
+            m_ItemLog.log(ITEM_TYPE_ERROR) << "Script \"" << script_name << "\" not found" << csys::endl;
             return;
         }
 
         // About to run script.
-        m_ItemLog.log(INFO) << "Running \"" << script_name << "\"" << csys::endl;
+        m_ItemLog.log(ITEM_TYPE_INFO) << "Running \"" << script_name << "\"" << csys::endl;
 
         // Load if script is empty.
         if (script_pair->second->Data().empty())
@@ -137,7 +137,7 @@ namespace csys
             }
             catch (csys::Exception &e)
             {
-                Log(ERROR) << e.what() << csys::endl;
+                Log(ITEM_TYPE_ERROR) << e.what() << csys::endl;
             }
         }
 
@@ -272,7 +272,7 @@ namespace csys
             // Try to get variable name
             if ((range = line.NextPoi(line_index)).first == line.End())
             {
-                Log(ERROR) << s_ErrorNoVar << endl;
+                Log(ITEM_TYPE_ERROR) << s_ErrorNoVar << endl;
                 return;
             } else
                 // Append variable name.
@@ -282,7 +282,7 @@ namespace csys
         // Get runnable command
         auto command = m_Commands.find(command_name);
         if (command == m_Commands.end())
-            Log(ERROR) << s_ErrorSetGetNotFound << endl;
+            Log(ITEM_TYPE_ERROR) << s_ErrorSetGetNotFound << endl;
             // Run the command
         else
         {
@@ -293,7 +293,7 @@ namespace csys
             auto cmd_out = (*command->second)(arguments);
 
             // Log output.
-            if (cmd_out.m_Type != NONE)
+            if (cmd_out.m_Type != ITEM_TYPE_NONE)
                 m_ItemLog.Items().emplace_back(cmd_out);
         }
     }
