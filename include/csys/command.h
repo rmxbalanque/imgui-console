@@ -112,9 +112,9 @@ namespace csys
             catch (Exception &ae)
             {
                 // Error happened with parsing
-                return Item(ITEM_TYPE_ERROR) << (m_Name.m_String + ": " + ae.what());
+                return Item(LOG_TYPE_ERROR) << (m_Name.m_String + ": " + ae.what());
             }
-            return Item(ITEM_TYPE_NONE);
+            return Item(LOG_TYPE_NONE);
         }
 
         /*!
@@ -240,12 +240,12 @@ namespace csys
             catch (Exception &ae)
             {
                 // Command had something passed into it
-                return Item(ITEM_TYPE_ERROR) << (m_Name.m_String + ": " + ae.what());
+                return Item(LOG_TYPE_ERROR) << (m_Name.m_String + ": " + ae.what());
             }
 
             // Call function
             m_Function();
-            return Item(ITEM_TYPE_NONE);
+            return Item(LOG_TYPE_NONE);
         }
 
         /*!
