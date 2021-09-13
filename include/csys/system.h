@@ -106,7 +106,7 @@ namespace csys
          * \return
          *      Reference to console items obj
          */
-        ItemLog &Log(ItemType type = ItemType::LOG);
+        ItemLog &Log(ItemType type = ItemType::LOG_TYPE_LOG);
 
         /*!
          * \brief
@@ -169,7 +169,7 @@ namespace csys
             // Check if command has a name
             else if (range.first == name.End())
             {
-                Log(ERROR) << "Empty command name given" << csys::endl;
+                Log(LOG_TYPE_ERROR) << "Empty command name given" << csys::endl;
                 return;
             }
 
@@ -192,7 +192,7 @@ namespace csys
 
             // Make help command for command just added
             auto help = [this, command_name]() {
-                Log(LOG) << m_Commands[command_name]->Help() << csys::endl;
+                Log(LOG_TYPE_LOG) << m_Commands[command_name]->Help() << csys::endl;
             };
 
             m_Commands["help " + command_name] = std::make_unique<Command<decltype(help)>>("help " + command_name,
@@ -315,7 +315,7 @@ namespace csys
 
             // Get Command
             const auto GetFunction = [this, &var]() {
-                m_ItemLog.log(LOG) << var << endl;
+                m_ItemLog.log(LOG_TYPE_LOG) << var << endl;
             };
 
             // Register get command

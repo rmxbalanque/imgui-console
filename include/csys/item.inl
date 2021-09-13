@@ -39,17 +39,17 @@ namespace csys
     {
         switch (m_Type)
         {
-            case COMMAND:
+            case LOG_TYPE_COMMAND:
                 return s_Command.data() + m_Data;
-            case LOG:
+            case LOG_TYPE_LOG:
                 return '\t' + m_Data;
-            case WARNING:
+            case LOG_TYPE_WARNING:
                 return s_Warning.data() + m_Data;
-            case ERROR:
+            case LOG_TYPE_ERROR:
                 return s_Error.data() + m_Data;
-            case INFO:
+            case LOG_TYPE_INFO:
                 return m_Data;
-            case NONE:
+            case LOG_TYPE_NONE:
             default:
                 return "";
         }

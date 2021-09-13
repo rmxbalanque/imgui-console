@@ -25,12 +25,12 @@ namespace csys
      */
     enum ItemType
     {
-        COMMAND = 0,
-        LOG,
-        WARNING,
-        ERROR,
-        INFO,
-        NONE
+        LOG_TYPE_COMMAND = 0,
+        LOG_TYPE_LOG,
+        LOG_TYPE_WARNING,
+        LOG_TYPE_ERROR,
+        LOG_TYPE_INFO,
+        LOG_TYPE_NONE
     };
 
     struct CSYS_API Item
@@ -41,7 +41,7 @@ namespace csys
          * \param type
          *      Item type to be stored
          */
-        explicit Item(ItemType type = ItemType::LOG);
+        explicit Item(ItemType type = ItemType::LOG_TYPE_LOG);
 
         /*!
          * \brief

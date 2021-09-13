@@ -218,7 +218,7 @@ void ImGuiConsole::LogWindow()
                 continue;
 
             // Spacing between commands.
-            if (item.m_Type == csys::COMMAND)
+            if (item.m_Type == csys::LOG_TYPE_COMMAND)
             {
                 if (m_TimeStamps) ImGui::PushTextWrapPos(ImGui::GetColumnWidth() - timestamp_width);    // Wrap before timestamps start.
                 if (count++ != 0) ImGui::Dummy(ImVec2(-1, ImGui::GetFontSize()));                            // No space for the first command.
@@ -238,7 +238,7 @@ void ImGuiConsole::LogWindow()
 
 
             // Time stamp.
-            if (item.m_Type == csys::COMMAND && m_TimeStamps)
+            if (item.m_Type == csys::LOG_TYPE_COMMAND && m_TimeStamps)
             {
                 // No wrap for timestamps
                 ImGui::PopTextWrapPos();
@@ -485,10 +485,10 @@ int ImGuiConsole::InputCallback(ImGuiInputTextCallbackData *data)
                 // Display suggestions on console.
                 if (!console->m_CmdSuggestions.empty())
                 {
-                    console->m_ConsoleSystem.Log(csys::COMMAND) << "Suggestions: " << csys::endl;
+                    console->m_ConsoleSystem.Log(csys::LOG_TYPE_COMMAND) << "Suggestions: " << csys::endl;
 
                     for (const auto &suggestion : console->m_CmdSuggestions)
-                        console->m_ConsoleSystem.Log(csys::LOG) << suggestion << csys::endl;
+                        console->m_ConsoleSystem.Log(csys::LOG_TYPE_LOG) << suggestion << csys::endl;
 
                     console->m_CmdSuggestions.clear();
                 }
