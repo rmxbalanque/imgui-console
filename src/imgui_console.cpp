@@ -73,6 +73,9 @@ ImGuiConsole::ImGuiConsole(std::string c_name, size_t inputBufferSize) : m_Conso
         DefaultSettings();
     }
 
+    // Window starts open.
+    m_Open = true;
+
     // Custom functions.
     RegisterConsoleCommands();
 }
@@ -83,9 +86,13 @@ void ImGuiConsole::Draw()
     // Window and Settings ////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
 
+    // Early out
+    if (!m_Open)
+        return;
+
     // Begin Console Window.
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, m_WindowAlpha);
-    if (!ImGui::Begin(m_ConsoleName.data(), nullptr, ImGuiWindowFlags_MenuBar))
+    if (!ImGui::Begin(m_ConsoleName.data(), &m_Open, ImGuiWindowFlags_MenuBar))
     {
         ImGui::PopStyleVar();
         ImGui::End();
@@ -144,6 +151,11 @@ void ImGuiConsole::InitIniSettings()
         g.SettingsHandlers.push_back(console_ini_handler);
     }
     // else Ini settings already loaded!
+}
+
+bool& ImGuiConsole::OpenFlag()
+{
+    return m_Open;
 }
 
 void ImGuiConsole::DefaultSettings()

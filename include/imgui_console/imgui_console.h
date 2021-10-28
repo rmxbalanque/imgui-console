@@ -37,6 +37,11 @@ public:
      */
     csys::System &System();
 
+    /*!
+     *  \brief Get flag that determines if the imgui console window should be created or not
+     */
+    bool & OpenFlag();
+
 protected:
 
     // Console ////////////////////////////////////////////////////////////////
@@ -56,6 +61,7 @@ protected:
     bool m_ScrollToBottom;           //!< Scroll to bottom after is command is ran
     bool m_FilterBar;                //!< Filter bar flag.
     bool m_TimeStamps;                 //!< Display time stamps flag
+    bool m_Open;                     //!< Flag to determine if console is closed
 
     void InitIniSettings();             //!< Initialize Ini Settings handler
     void DefaultSettings();             //!< Restore console default settings
