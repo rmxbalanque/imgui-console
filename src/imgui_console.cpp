@@ -257,10 +257,9 @@ void ImGuiConsole::LogWindow()
         if ((m_ScrollToBottom && (ImGui::GetScrollY() >= ImGui::GetScrollMaxY() || m_AutoScroll)))
             ImGui::SetScrollHereY(1.0f);
         m_ScrollToBottom = false;
-
-        // Loop through command string vector.
-        ImGui::EndChild();
     }
+    // Loop through command string vector.
+    ImGui::EndChild();
 }
 
 void ImGuiConsole::InputBar()
